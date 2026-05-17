@@ -1,0 +1,2 @@
+//IDE0007 = Use var instead of explicit type
+dotnet_diagnostic.IDE0007.severity = none
