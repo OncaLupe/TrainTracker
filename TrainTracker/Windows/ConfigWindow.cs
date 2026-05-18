@@ -53,6 +53,7 @@ public class ConfigWindow : Window, IDisposable
         if(ImGui.Checkbox("Tracking active", ref tracking))
         {
             configuration.isTracking = tracking;
+            plugin.CheckMode();
             plugin.mainWindow.SetWindowTitle();
             configuration.Save();
         }
@@ -76,6 +77,7 @@ public class ConfigWindow : Window, IDisposable
         if(ImGui.Checkbox("Track with window closed", ref trackWithWindowClosed))
         {
             configuration.isTrackingWithWindowClosed = trackWithWindowClosed;
+            plugin.CheckMode();
             configuration.Save();
         }
         if (ImGui.IsItemHovered())

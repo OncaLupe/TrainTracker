@@ -47,6 +47,7 @@ public class MainWindow : Window, IDisposable
             Icon = FontAwesomeIcon.PowerOff,
             Click = _ => {
                 configuration.isTracking = !configuration.isTracking;
+                plugin.CheckMode();
                 SetWindowTitle();
                 configuration.Save();
             }

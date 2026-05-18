@@ -61,6 +61,8 @@ public sealed class Plugin : IDalamudPlugin
     public string[] nameFilters = [];
     public List<SavedMessages> savedMessages = [];
 
+    public bool trackingActive = false;
+
     public MapLinkPayload currentMapPayload = new(0, 0, 0, 0);
     public bool hasNewFlag = false;
     public uint currentMapID = 0;
@@ -108,20 +110,18 @@ public sealed class Plugin : IDalamudPlugin
         // Example Output: 00:57:54.959 | INF | [SamplePlugin] ===A cool log message from Sample Plugin===
         //Log.Information($"===Initializing {PluginInterface.Manifest.Name}===");
 
-        ChatGui.ChatMessage += Chat_OnChatMessage;
-        Framework.Update += OnFrameworkUpdate;
 
 #if DEBUG
         //For testing, auto open window
-        mainWindow.Toggle();
+        ToggleMainUi();
+#else
+        CheckMode();
 #endif
     }
 
     private void Chat_OnChatMessage(IHandleableChatMessage chatMessage)
     {
-        if (!configuration.isTracking) return;
-
-        if (!mainWindow.IsOpen && !configuration.isTrackingWithWindowClosed) return;
+        if (!trackingActive) return;
 
 #if DEBUG
         if ((configuration.trackedChannels.IndexOf(chatMessage.LogKind) == -1) && (chatMessage.LogKind != XivChatType.Echo)) return;
@@ -220,6 +220,8 @@ public sealed class Plugin : IDalamudPlugin
 
     private void OnFrameworkUpdate(IFramework framework)
     {
+        if (!trackingActive) return;
+
         uint currMap = ClientState.MapId;
         uint currIns = ClientState.Instance;
 
@@ -290,16 +292,44 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.RemoveHandler(CommandName);
 
-        ChatGui.ChatMessage -= Chat_OnChatMessage;
-        Framework.Update -= OnFrameworkUpdate;
+        if (trackingActive)
+        {
+            ChatGui.ChatMessage -= Chat_OnChatMessage;
+            Framework.Update -= OnFrameworkUpdate;
+        }
     }
 
     private void OnCommand(string command, string args)
     {
         // In response to the slash command, toggle the display status of our main ui
-        mainWindow.Toggle();
+        ToggleMainUi();
     }
 
     public void ToggleConfigUi() => configWindow.Toggle();
-    public void ToggleMainUi() => mainWindow.Toggle();
+    public void ToggleMainUi()
+    {
+        mainWindow.IsOpen ^= true;
+        CheckMode();
+    }
+
+    public void CheckMode()
+    {
+        //Log.Information("CheckMode- trackingActive: " + trackingActive.ToString() + ", isTracking: " + configuration.isTracking.ToString() + ", windowOpen: " + mainWindow.IsOpen + ", whileClosed: " + configuration.isTrackingWithWindowClosed);
+        if(configuration.isTracking && (mainWindow.IsOpen || configuration.isTrackingWithWindowClosed))
+        {
+            if (!trackingActive)
+            {
+                trackingActive = true;
+                ChatGui.ChatMessage += Chat_OnChatMessage;
+                Framework.Update += OnFrameworkUpdate;
+                Log.Information("Tracking is now active");
+            }
+        }else if (trackingActive)
+        {
+            trackingActive = false;
+            ChatGui.ChatMessage -= Chat_OnChatMessage;
+            Framework.Update -= OnFrameworkUpdate;
+            Log.Information("Tracking is now disabled");
+        }
+    }
 }
