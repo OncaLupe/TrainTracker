@@ -3,8 +3,10 @@ using Dalamud.Game.Text;
 using Dalamud.Interface.Windowing;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.Text;
+using Lumina.Data.Parsing;
 using Serilog;
 using System;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace TrainTracker.Windows;
@@ -57,6 +59,18 @@ public class ConfigWindow : Window, IDisposable
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip("Record chat from tracked channels that match the Name Filter");
 
+
+        ImGui.SameLine(ImGui.GetColumnWidth() - 100);
+        ImGui.PushStyleColor(ImGuiCol.Button, 0xFF5A66FF);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0xFD4A39FF);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0xFF0000FF);
+        if (ImGui.Button("Support on Ko-Fi"))
+        {
+            Process.Start(new ProcessStartInfo { FileName = "https://ko-fi.com/oncalupe", UseShellExecute = true });
+        }
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip("Show your support and make me feel warm and fuzzy, and maybe yourself as well");
+        ImGui.PopStyleColor(3);
 
         bool trackWithWindowClosed = configuration.isTrackingWithWindowClosed;
         if(ImGui.Checkbox("Track with window closed", ref trackWithWindowClosed))

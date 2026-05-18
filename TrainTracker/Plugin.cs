@@ -22,6 +22,7 @@ using TrainTracker.Windows;
  * TODO:
  * test multi name filter
  * register chat hook only when tracking?
+ * localization?
  */
 
 namespace TrainTracker;
