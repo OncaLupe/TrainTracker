@@ -126,6 +126,7 @@ public class ConfigWindow : Window, IDisposable
         }
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip("Track messages from Say chat");
+        /*
         ImGui.SameLine();
         bool trackParty = (configuration.trackedChannels.IndexOf(XivChatType.Party) != -1);
         if (ImGui.Checkbox("Party", ref trackParty))
@@ -140,7 +141,7 @@ public class ConfigWindow : Window, IDisposable
         }
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip("Track messages from Party chat");
-
+        */
 
         ImGui.SetNextItemWidth(175);
         int timestamp = configuration.selectedTimestamp;

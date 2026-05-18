@@ -40,7 +40,7 @@ public sealed class Plugin : IDalamudPlugin
     //[PluginService] internal static ITextureProvider TextureProvider { get; private set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
-    [PluginService] internal static IPlayerState PlayerState { get; private set; } = null!;
+    //[PluginService] internal static IPlayerState PlayerState { get; private set; } = null!;
     [PluginService] internal static IFramework Framework { get; set; } = null!;
     //[PluginService] public static IDataManager DataManager { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
@@ -137,10 +137,14 @@ public sealed class Plugin : IDalamudPlugin
         //Convert sender to PlayerPayload and grab the sender's name text. This is just the raw name without the worldname.
         string senderName = "";
         //Log.Information(chatMessage.Sender.Payloads.Count.ToString());
+        //foreach(Payload payload in chatMessage.Sender.Payloads)
+        //{
+            //Log.Information(payload.Type.ToString() + " - " + payload.ToString());
+        //}
         if(chatMessage.Sender.Payloads.Count > 1)
         {
-             senderName = ((PlayerPayload)chatMessage.Sender.Payloads[0]).PlayerName;
-            Log.Information("senderName: " + senderName);
+            senderName = ((PlayerPayload)chatMessage.Sender.Payloads[0]).PlayerName;
+            //Log.Information("senderName: " + senderName);
         }
         else
         {
@@ -180,7 +184,7 @@ public sealed class Plugin : IDalamudPlugin
                     currentMapPayload = mapLinkPayload;
                     hasNewFlag = true;
                     targetMapID = mapLinkPayload.Map.RowId;
-                    //ClientState.Instance
+                    if (configuration.autoPlaceFlag) PlaceFlag();
                     if (configuration.selectedSound > 0)
                     {
                         UIGlobals.PlayChatSoundEffect((uint)configuration.selectedSound);
@@ -190,6 +194,7 @@ public sealed class Plugin : IDalamudPlugin
             else if (configuration.showInstanceChange && payload.Type == PayloadType.RawText)
             {
                 string text = ((TextPayload)payload).Text ?? "";
+                text = text.ToLower();
                 text = text.Replace(" ", string.Empty);
 
                 if (PossibleInstance1.Any(text.Contains))

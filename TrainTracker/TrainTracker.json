@@ -1,11 +1,12 @@
 {
   "Author": "OncaLupe",
   "Name": "Train Tracker",
-  "Punchline": "Follow hunt trains without the cringe of /shout",
-  "Description": "Follow hunt trains without the cringe of /shout",
+  "Punchline": "Hunt train helper to make it easier to follow",
+  "Description": "Hunt train helper to make it easier to follow",
   "ApplicableVersion": "any",
   "Tags": [
     "train",
     "hunt"
-  ]
+  ],
+  "IconUrl": "Images/icon.png"
 }
