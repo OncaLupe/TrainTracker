@@ -2,9 +2,6 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Game.Text;
 using Dalamud.Interface.Windowing;
 using FFXIVClientStructs.FFXIV.Client.UI;
-using FFXIVClientStructs.FFXIV.Component.Text;
-using Lumina.Data.Parsing;
-using Serilog;
 using System;
 using System.Diagnostics;
 using System.Numerics;
@@ -16,6 +13,9 @@ public class ConfigWindow : Window, IDisposable
 {
     private readonly Plugin plugin;
     private readonly Configuration configuration;
+
+    public static readonly string[] PossibleTimestamps = ["None", "hh:mm tt", "hh:mm t", "HH:mm", "hh:mm:ss tt", "hh:mm:ss t", "HH:mm:ss"];
+    public static readonly string[] PossibleSounds = ["None", "Sound 1", "Sound 2", "Sound 3", "Sound 4", "Sound 5", "Sound 6", "Sound 7", "Sound 8", "Sound 9", "Sound 10", "Sound 11", "Sound 12", "Sound 13", "Sound 14", "Sound 15", "Sound 16"];
 
     public ConfigWindow(Plugin plugin) : base("Train Tracker Config")
     {
@@ -72,6 +72,7 @@ public class ConfigWindow : Window, IDisposable
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip("Show your support and make me feel warm and fuzzy, and maybe yourself as well");
         ImGui.PopStyleColor(3);
+
 
         bool trackWithWindowClosed = configuration.isTrackingWithWindowClosed;
         if(ImGui.Checkbox("Track with window closed", ref trackWithWindowClosed))
@@ -143,6 +144,7 @@ public class ConfigWindow : Window, IDisposable
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip("Track messages from Say chat");
         /*
+        //disabled as chat message sender has different setup. Would need to figure out converting to plain name first if wanting to use this
         ImGui.SameLine();
         bool trackParty = (configuration.trackedChannels.IndexOf(XivChatType.Party) != -1);
         if (ImGui.Checkbox("Party", ref trackParty))
@@ -161,7 +163,7 @@ public class ConfigWindow : Window, IDisposable
 
         ImGui.SetNextItemWidth(175);
         int timestamp = configuration.selectedTimestamp;
-        if(ImGui.Combo("Timestamps", ref timestamp, Plugin.PossibleTimestamps, Plugin.PossibleTimestamps.Length))
+        if(ImGui.Combo("Timestamps", ref timestamp, PossibleTimestamps, PossibleTimestamps.Length))
         {
             configuration.selectedTimestamp = timestamp;
             configuration.Save();
@@ -183,7 +185,7 @@ public class ConfigWindow : Window, IDisposable
 
         ImGui.SetNextItemWidth(175);
         int sound = configuration.selectedSound;
-        if (ImGui.Combo("New flag sound", ref sound, Plugin.PossibleSounds, Plugin.PossibleSounds.Length))
+        if (ImGui.Combo("New flag sound", ref sound, PossibleSounds, PossibleSounds.Length))
         {
             configuration.selectedSound = sound;
             if(sound > 0)
@@ -192,6 +194,7 @@ public class ConfigWindow : Window, IDisposable
             }
             configuration.Save();
         }
+
 
         bool showTeleNeed = configuration.showTeleportNeeded;
         if (ImGui.Checkbox("Show teleport", ref showTeleNeed))
@@ -202,6 +205,7 @@ public class ConfigWindow : Window, IDisposable
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip("Show if the new recorded flag is in a different zone");
 
+
         bool showInstanceChange = configuration.showInstanceChange;
         if (ImGui.Checkbox("Show instance change", ref showInstanceChange))
         {
@@ -210,6 +214,7 @@ public class ConfigWindow : Window, IDisposable
         }
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip("Try to show if the new recorded flag is in a different instance (conductor has to say an instance message, doesn't use the flag itself)");
+
 
         bool autoPlaceFlag = configuration.autoPlaceFlag;
         if (ImGui.Checkbox("Auto place flag", ref autoPlaceFlag))

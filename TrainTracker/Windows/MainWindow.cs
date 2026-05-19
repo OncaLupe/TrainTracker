@@ -1,20 +1,9 @@
 using Dalamud.Bindings.ImGui;
-using Dalamud.Game.Chat;
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface;
-using Dalamud.Interface.Textures;
-using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using Dalamud.Plugin.Services;
-using Dalamud.Utility;
-using FFXIVClientStructs.FFXIV.Client.Game.Fate;
-using Lumina.Data.Parsing.Scd;
-using Lumina.Excel.Sheets;
 using System;
 using System.Numerics;
-using System.Runtime.Serialization;
 
 namespace TrainTracker.Windows;
 
@@ -36,6 +25,7 @@ public class MainWindow : Window, IDisposable
 
         this.plugin = plugin;
         this.configuration = plugin.configuration;
+
 
         TitleBarButtons.Add(new TitleBarButton
         {
@@ -71,10 +61,6 @@ public class MainWindow : Window, IDisposable
             //Trim off the final ", "
             name = name[..^2];
         }
-        //if (!plugin.nameFilter.IsNullOrEmpty())
-        //{
-            //name += ", filter: " + plugin.nameFilter;
-        //}
         WindowName = name + ")###Train Tracker Main Window";
     }
 
@@ -103,9 +89,6 @@ public class MainWindow : Window, IDisposable
         {
             if (configuration.showTeleportNeeded && (plugin.targetMapID != plugin.currentMapID))
             {
-                //string text = "Teleport needed";
-                //ImGui.SameLine(ImGui.GetColumnWidth() - ImGui.CalcTextSize(text).X);
-                //ImGui.Text(text);
                 ImGui.SameLine();
                 CenterText("Teleport needed");
             } else if (configuration.showInstanceChange && (plugin.currentInstance != 0) && (plugin.targetInstance != 0) && (plugin.targetInstance != plugin.currentInstance))
@@ -128,19 +111,6 @@ public class MainWindow : Window, IDisposable
         //ImGui.Text("Target location: " + plugin.targetMapID + " (" + plugin.targetInstance + ")");
 
 
-        /*
-        // Example for querying Lumina, getting the name of our current area.
-        if (Plugin.DataManager.GetExcelSheet<TerritoryType>().TryGetRow(territoryId, out var territoryRow))
-        {
-            ImGui.Text($"Current location:");
-            ImGui.SameLine(120 * ImGuiHelpers.GlobalScale);
-            ImGui.Text(territoryRow.PlaceName.Value.Name.ToString());
-        }
-        else
-        {
-            ImGui.Text("Invalid territory.");
-        }
-        */
         // Normally a BeginChild() would have to be followed by an unconditional EndChild(),
         // ImRaii takes care of this after the scope ends.
         // This works for all ImGui functions that require specific handling, examples are BeginTable() or Indent().
@@ -159,14 +129,9 @@ public class MainWindow : Window, IDisposable
                     ImGui.AlignTextToFramePadding();
                     if (configuration.selectedTimestamp > 0)
                     {
-                        text += "[" + plugin.savedMessages[i].timestamp.ToString(Plugin.PossibleTimestamps[configuration.selectedTimestamp]) + "] ";
-                        //ImGui.Text("[" + plugin.savedMessages[i].timestamp.ToString(Plugin.PossibleTimestamps[configuration.selectedTimestamp]) + "]");
-                        //ImGui.SameLine();
+                        text += "[" + plugin.savedMessages[i].timestamp.ToString(ConfigWindow.PossibleTimestamps[configuration.selectedTimestamp]) + "] ";
                     }
                     text += plugin.savedMessages[i].sender.ToString() + ": " + plugin.savedMessages[i].message.ToString();
-                    //ImGui.Text(plugin.savedMessages[i].sender.ToString() + ":");
-                    //ImGui.SameLine();
-                    //ImGui.Text(plugin.savedMessages[i].message.ToString());
                     if (configuration.wordWrap)
                     {
                         ImGui.PushTextWrapPos();
@@ -186,7 +151,7 @@ public class MainWindow : Window, IDisposable
     {
         float size = ImGui.CalcTextSize(text).X;
         float avail = ImGui.GetContentRegionMax().X;
-        ImGui.SetCursorPosX((avail / 2) - (size / 2));// + (size / 2));
+        ImGui.SetCursorPosX((avail / 2) - (size / 2));
         ImGui.Text(text);
     }
 }

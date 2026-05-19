@@ -1,4 +1,3 @@
-using Dalamud.Bindings.ImGui;
 using Dalamud.Game.Chat;
 using Dalamud.Game.Command;
 using Dalamud.Game.Text;
@@ -9,12 +8,9 @@ using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
-using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.UI;
-using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Numerics;
 using TrainTracker.Windows;
@@ -45,7 +41,6 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IFramework Framework { get; set; } = null!;
     //[PluginService] public static IDataManager DataManager { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
-
     [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
     [PluginService] internal static IGameGui GameGui { get; private set; } = null!;
 
@@ -57,7 +52,6 @@ public sealed class Plugin : IDalamudPlugin
     private ConfigWindow configWindow { get; init; }
     public MainWindow mainWindow { get; init; }
 
-    //public string nameFilter = string.Empty;
     public string[] nameFilters = [];
     public List<SavedMessages> savedMessages = [];
 
@@ -69,9 +63,6 @@ public sealed class Plugin : IDalamudPlugin
     public uint currentInstance = 0;
     public uint targetMapID = 0;
     public uint targetInstance = 0;
-    
-    public static readonly string[] PossibleTimestamps = ["None", "hh:mm tt", "hh:mm t", "HH:mm", "hh:mm:ss tt", "hh:mm:ss t", "HH:mm:ss"];
-    public static readonly string[] PossibleSounds = ["None", "Sound 1", "Sound 2", "Sound 3", "Sound 4", "Sound 5", "Sound 6", "Sound 7", "Sound 8", "Sound 9", "Sound 10", "Sound 11", "Sound 12", "Sound 13", "Sound 14", "Sound 15", "Sound 16"];
     
     //The first square on each instance line is the FFXIV Instance symbol for that #, the second is the square # symbol just in case
     public static readonly string[] PossibleInstance1 = ["i1", "instance1", "instance", "instance"];
@@ -92,7 +83,7 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
-            HelpMessage = "Open tracker window"
+            HelpMessage = "Open Train Tracker window"
         });
 
         // Tell the UI system that we want our windows to be drawn through the window system
@@ -125,31 +116,36 @@ public sealed class Plugin : IDalamudPlugin
 
 #if DEBUG
         if ((configuration.trackedChannels.IndexOf(chatMessage.LogKind) == -1) && (chatMessage.LogKind != XivChatType.Echo)) return;
-        //if (chatMessage.LogKind == XivChatType.Echo) chatMessage.Sender = "Echo";
 #else
         if (configuration.TrackedChannels.IndexOf(chatMessage.LogKind) == -1) return;
 #endif
         //Log.Information("Chat message recieved");
 
         //Ignore repeated message, such as conductor sending message to both Shout and Yell, or spamming instance message
-        //Count check as ^1 errors out if empty
         if ((savedMessages.Count > 0) && (chatMessage.Message.ToString() == savedMessages[^1].message.ToString())) return;
 
-        //Convert sender to PlayerPayload and grab the sender's name text. This is just the raw name without the worldname.
-        string senderName = "";
-        //Log.Information(chatMessage.Sender.Payloads.Count.ToString());
+        //Log.Information("sender payloads: " + chatMessage.Sender.Payloads.Count);
         //foreach(Payload payload in chatMessage.Sender.Payloads)
         //{
-            //Log.Information(payload.Type.ToString() + " - " + payload.ToString());
+            //Log.Information("type: " + payload.Type + " - " + payload.ToString());
         //}
-        if(chatMessage.Sender.Payloads.Count > 1)
+        string senderName = "";
+        if (chatMessage.Sender.Payloads.Count == 1)
         {
+            //Single payload, message is just RawText with their name
+            senderName = ((TextPayload)chatMessage.Sender.Payloads[0]).Text ?? "UnknownPlayer";
+            //Log.Information("1 payload, senderName: " + senderName);
+        }
+        else if(chatMessage.Sender.Payloads.Count > 1)
+        { 
+            //Multiple payloads, message starts with a PlayerPayload with their name
             senderName = ((PlayerPayload)chatMessage.Sender.Payloads[0]).PlayerName;
-            //Log.Information("senderName: " + senderName);
+            //Log.Information(">1 payload, senderName: " + senderName);
         }
         else
         {
             senderName = "Echo";
+            //Log.Information("No payload, setting senderName to Echo ");
         }
 
         
@@ -159,9 +155,9 @@ public sealed class Plugin : IDalamudPlugin
         {
             foreach (string name in nameFilters)
             {
-                Log.Information("testing: " + name);
+                //Log.Information("testing: " + name + " against: " + senderName);
                 if (senderName.Contains(name, StringComparison.CurrentCultureIgnoreCase)) filtered = false;
-                Log.Information("filtered: " + (filtered ? "true" : "false"));
+                //Log.Information("filtered: " + (filtered ? "true" : "false"));
             }
         }
 
@@ -218,6 +214,11 @@ public sealed class Plugin : IDalamudPlugin
         }
     }
 
+    public void SendLog(string text)
+    {
+        Log.Information(text);
+    }
+
     private void OnFrameworkUpdate(IFramework framework)
     {
         if (!trackingActive) return;
@@ -241,7 +242,8 @@ public sealed class Plugin : IDalamudPlugin
             return false;
         }
 
-        if ((Math.Abs(map1.XCoord - map2.XCoord) > configuration.newFlagDistance) || (Math.Abs(map1.YCoord - map2.YCoord) > configuration.newFlagDistance))
+        float distance = Vector2.Distance(new Vector2(map1.XCoord, map1.YCoord), new Vector2(map2.XCoord, map2.YCoord));
+        if (distance > configuration.newFlagDistance)
         {
             return false;
         }
@@ -322,14 +324,16 @@ public sealed class Plugin : IDalamudPlugin
                 trackingActive = true;
                 ChatGui.ChatMessage += Chat_OnChatMessage;
                 Framework.Update += OnFrameworkUpdate;
-                Log.Information("Tracking is now active");
+                ChatGui.Print("[Train Tracker] Tracking is now active.");
+                //Log.Information("Tracking is now active");
             }
         }else if (trackingActive)
         {
             trackingActive = false;
             ChatGui.ChatMessage -= Chat_OnChatMessage;
             Framework.Update -= OnFrameworkUpdate;
-            Log.Information("Tracking is now disabled");
+            ChatGui.Print("[Train Tracker] Tracking is now disabled.");
+            //Log.Information("Tracking is now disabled");
         }
     }
 }
