@@ -77,6 +77,12 @@ public class MainWindow : Window, IDisposable
         {
             plugin.ParseNameFilter(nameTemp);
         }
+        ImGui.SameLine();
+        if (ImGui.Button("X"))
+        {
+            nameTemp = "";
+            plugin.ParseNameFilter(nameTemp);
+        }
 
 
         if (ImGui.Button("Clear chat"))

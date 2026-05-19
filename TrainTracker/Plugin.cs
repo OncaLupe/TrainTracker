@@ -16,8 +16,6 @@ using System.Numerics;
 using TrainTracker.Windows;
 /*
  * TODO:
- * test multi name filter
- * register chat hook only when tracking?
  * localization?
  */
 
@@ -226,11 +224,6 @@ public sealed class Plugin : IDalamudPlugin
         }
     }
 
-    public void SendLog(string text)
-    {
-        Log.Information(text);
-    }
-
     //Compare two Map Link Payloads. Returns 'true' if both are in the same territory and closer together than the New Flag Distance setting.
     private bool CompareMapPayloads(MapLinkPayload map1, MapLinkPayload map2)
     {
@@ -296,7 +289,6 @@ public sealed class Plugin : IDalamudPlugin
             ChatGui.ChatMessage -= Chat_OnChatMessage;
             ClientState.MapIdChanged -= MapIdChanged;
             ClientState.InstanceChanged -= InstanceChanged;
-            //Framework.Update -= OnFrameworkUpdate;
         }
     }
 
@@ -326,7 +318,6 @@ public sealed class Plugin : IDalamudPlugin
                 ChatGui.ChatMessage += Chat_OnChatMessage;
                 ClientState.MapIdChanged += MapIdChanged;
                 ClientState.InstanceChanged += InstanceChanged;
-                //Framework.Update += OnFrameworkUpdate;
                 ChatGui.Print("[Train Tracker] Tracking is now active.");
                 //Log.Information("Tracking is now active");
             }
@@ -336,7 +327,6 @@ public sealed class Plugin : IDalamudPlugin
             ChatGui.ChatMessage -= Chat_OnChatMessage;
             ClientState.MapIdChanged -= MapIdChanged;
             ClientState.InstanceChanged -= InstanceChanged;
-            //Framework.Update -= OnFrameworkUpdate;
             ChatGui.Print("[Train Tracker] Tracking is now disabled.");
             //Log.Information("Tracking is now disabled");
         }
