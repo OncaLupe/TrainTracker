@@ -38,7 +38,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
     //[PluginService] internal static IPlayerState PlayerState { get; private set; } = null!;
-    [PluginService] internal static IFramework Framework { get; set; } = null!;
+    //[PluginService] internal static IFramework Framework { get; set; } = null!;
     //[PluginService] public static IDataManager DataManager { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
     [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
@@ -108,6 +108,18 @@ public sealed class Plugin : IDalamudPlugin
 #else
         CheckMode();
 #endif
+    }
+
+    private void InstanceChanged(uint newInstance)
+    {
+        //Log.Information("InstanceChanged: " + newInstance.ToString());
+        currentInstance = newInstance;
+    }
+
+    private void MapIdChanged(uint newMap)
+    {
+        //Log.Information("MapIdChanged: " + newMap.ToString());
+        currentMapID = newMap;
     }
 
     private void Chat_OnChatMessage(IHandleableChatMessage chatMessage)
@@ -219,21 +231,6 @@ public sealed class Plugin : IDalamudPlugin
         Log.Information(text);
     }
 
-    private void OnFrameworkUpdate(IFramework framework)
-    {
-        if (!trackingActive) return;
-
-        uint currMap = ClientState.MapId;
-        uint currIns = ClientState.Instance;
-
-        if((currentMapID != currMap) || (currentInstance != currIns))
-        {
-            currentMapID = currMap;
-            currentInstance = currIns;
-            if (currentInstance == 0) targetInstance = 0;
-        }
-    }
-
     //Compare two Map Link Payloads. Returns 'true' if both are in the same territory and closer together than the New Flag Distance setting.
     private bool CompareMapPayloads(MapLinkPayload map1, MapLinkPayload map2)
     {
@@ -297,7 +294,9 @@ public sealed class Plugin : IDalamudPlugin
         if (trackingActive)
         {
             ChatGui.ChatMessage -= Chat_OnChatMessage;
-            Framework.Update -= OnFrameworkUpdate;
+            ClientState.MapIdChanged -= MapIdChanged;
+            ClientState.InstanceChanged -= InstanceChanged;
+            //Framework.Update -= OnFrameworkUpdate;
         }
     }
 
@@ -322,8 +321,12 @@ public sealed class Plugin : IDalamudPlugin
             if (!trackingActive)
             {
                 trackingActive = true;
+                currentMapID = ClientState.MapId;
+                currentInstance = ClientState.Instance;
                 ChatGui.ChatMessage += Chat_OnChatMessage;
-                Framework.Update += OnFrameworkUpdate;
+                ClientState.MapIdChanged += MapIdChanged;
+                ClientState.InstanceChanged += InstanceChanged;
+                //Framework.Update += OnFrameworkUpdate;
                 ChatGui.Print("[Train Tracker] Tracking is now active.");
                 //Log.Information("Tracking is now active");
             }
@@ -331,7 +334,9 @@ public sealed class Plugin : IDalamudPlugin
         {
             trackingActive = false;
             ChatGui.ChatMessage -= Chat_OnChatMessage;
-            Framework.Update -= OnFrameworkUpdate;
+            ClientState.MapIdChanged -= MapIdChanged;
+            ClientState.InstanceChanged -= InstanceChanged;
+            //Framework.Update -= OnFrameworkUpdate;
             ChatGui.Print("[Train Tracker] Tracking is now disabled.");
             //Log.Information("Tracking is now disabled");
         }
