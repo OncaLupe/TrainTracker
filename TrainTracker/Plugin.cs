@@ -21,11 +21,11 @@ using TrainTracker.Windows;
 
 namespace TrainTracker;
 
-public struct SavedMessages(DateTime _time, string _sender, SeString _message)
+public struct SavedMessages(DateTime _time, string _sender, string _message)
 {
     public DateTime timestamp = _time;
     public string sender = _sender;
-    public SeString message = _message;
+    public string message = _message;
 }
 
 
@@ -127,7 +127,7 @@ public sealed class Plugin : IDalamudPlugin
 #if DEBUG
         if ((configuration.trackedChannels.IndexOf(chatMessage.LogKind) == -1) && (chatMessage.LogKind != XivChatType.Echo)) return;
 #else
-        if (configuration.TrackedChannels.IndexOf(chatMessage.LogKind) == -1) return;
+        if (configuration.trackedChannels.IndexOf(chatMessage.LogKind) == -1) return;
 #endif
         //Log.Information("Chat message recieved");
 
@@ -173,7 +173,7 @@ public sealed class Plugin : IDalamudPlugin
 
         if (filtered) return;
 
-        savedMessages.Add(new SavedMessages(DateTime.Now, senderName, chatMessage.Message));
+        savedMessages.Add(new SavedMessages(DateTime.Now, senderName, chatMessage.Message.ToString()));
         if (savedMessages.Count > configuration.maxSavedLines)
         {
             savedMessages.RemoveRange(0, savedMessages.Count - configuration.maxSavedLines);
@@ -299,11 +299,7 @@ public sealed class Plugin : IDalamudPlugin
     }
 
     public void ToggleConfigUi() => configWindow.Toggle();
-    public void ToggleMainUi()
-    {
-        mainWindow.IsOpen ^= true;
-        CheckMode();
-    }
+    public void ToggleMainUi() => mainWindow.Toggle();
 
     public void CheckMode()
     {

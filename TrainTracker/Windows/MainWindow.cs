@@ -46,6 +46,16 @@ public class MainWindow : Window, IDisposable
         SetWindowTitle();
     }
 
+    public override void OnClose()
+    {
+        plugin.CheckMode();
+    }
+
+    public override void OnOpen()
+    {
+        plugin.CheckMode();
+    }
+
     public void Dispose() { }
 
     public void SetWindowTitle()
@@ -137,7 +147,7 @@ public class MainWindow : Window, IDisposable
                     {
                         text += "[" + plugin.savedMessages[i].timestamp.ToString(ConfigWindow.PossibleTimestamps[configuration.selectedTimestamp]) + "] ";
                     }
-                    text += plugin.savedMessages[i].sender.ToString() + ": " + plugin.savedMessages[i].message.ToString();
+                    text += plugin.savedMessages[i].sender + ": " + plugin.savedMessages[i].message;
                     if (configuration.wordWrap)
                     {
                         ImGui.PushTextWrapPos();

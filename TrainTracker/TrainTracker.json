@@ -1,9 +1,8 @@
 {
   "Author": "OncaLupe",
   "Name": "Train Tracker",
-  "Punchline": "Hunt train helper to make it easier to follow",
-  "Description": "Hunt train helper to make it easier to follow",
-  "ApplicableVersion": "any",
+  "Punchline": "Hunt train helper to make it easier to track where it's heading.",
+  "Description": "See just the conductor's messages so you don't miss flags, instance messages, or other instructions.",
   "Tags": [
     "train",
     "hunt"

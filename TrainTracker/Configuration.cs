@@ -1,6 +1,5 @@
 using Dalamud.Configuration;
 using Dalamud.Game.Text;
-using Serilog;
 using System;
 using System.Collections.Generic;
 
