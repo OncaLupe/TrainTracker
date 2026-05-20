@@ -3,7 +3,7 @@
 
 Train tracker plugin for Dalamud.
 
-See just the conductor's messages so you don't miss flags, instance messages, or other instructions.
+See only the conductor's messages so you don't miss flags, instance messages, or other instructions. Optionally set map flags to come up automatically.
 
 ## Main Points
 
@@ -17,6 +17,8 @@ See just the conductor's messages so you don't miss flags, instance messages, or
 
 ## Main window:
 <img width="515" height="234" alt="image" src="https://github.com/user-attachments/assets/ccd9ea6c-aa6c-4ae3-bbf5-c707989d08a2" />
+<img width="514" height="230" alt="image" src="https://github.com/user-attachments/assets/dd870c5f-d288-4bbe-b406-9e25080997b6" />
+
 
 * Name filter - Enter the name of the conductor to filter just their messages. Partial names allowed, capitalization doesn't matter. Enter or clicking 'Set Name Filter' to set.
     * Clear the text field or press the X button to clear.
