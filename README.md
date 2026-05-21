@@ -20,7 +20,9 @@ See only the conductor's messages so you don't miss flags, instance messages, or
 <img width="514" height="230" alt="image" src="https://github.com/user-attachments/assets/dd870c5f-d288-4bbe-b406-9e25080997b6" />
 
 
-* Name filter - Enter the name of the conductor to filter just their messages. Partial names allowed, capitalization doesn't matter. Enter or clicking 'Set Name Filter' to set.
+* Name filter - Enter the name of the conductor(s) to filter just their messages. Press Enter or clicking 'Set Name Filter' to set.
+    * Partial names allowed, capitalization doesn't matter.
+    * Multiple names can be entered, seperate names with a comma.
     * Clear the text field or press the X button to clear.
 * Chat box - Filtered messages (or all if no filter set) will show up here, newest on top.
 * Track toggle - Power button icon will toggle Tracking on/off
