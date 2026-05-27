@@ -130,7 +130,7 @@ public class MainWindow : Window, IDisposable
         // Normally a BeginChild() would have to be followed by an unconditional EndChild(),
         // ImRaii takes care of this after the scope ends.
         // This works for all ImGui functions that require specific handling, examples are BeginTable() or Indent().
-        using (ImRaii.ChildDisposable child = ImRaii.Child("SomeChildWithAScrollbar", Vector2.Zero, true))
+        using (var child = ImRaii.Child("SomeChildWithAScrollbar", Vector2.Zero, true))
         {
             // Check if this child is drawing
             if (child.Success)
@@ -150,9 +150,7 @@ public class MainWindow : Window, IDisposable
                     text += plugin.savedMessages[i].sender + ": " + plugin.savedMessages[i].message;
                     if (configuration.wordWrap)
                     {
-                        ImGui.PushTextWrapPos();
-                        ImGui.Text(text);
-                        ImGui.PopTextWrapPos();
+                        ImGui.TextWrapped(text);
                     }
                     else
                     {

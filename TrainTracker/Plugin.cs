@@ -62,11 +62,6 @@ public sealed class Plugin : IDalamudPlugin
     public uint targetMapID = 0;
     public uint targetInstance = 0;
     
-    //The first square on each instance line is the FFXIV Instance symbol for that #, the second is the square # symbol just in case
-    public static readonly string[] PossibleInstance1 = ["i1", "instance1", "instance", "instance"];
-    public static readonly string[] PossibleInstance2 = ["i2", "instance2", "instance", "instance"];
-    public static readonly string[] PossibleInstance3 = ["i3", "instance3", "instance", "instance"];
-    public static readonly string[] PossibleInstance4 = ["i4", "instance4", "instance", "instance"];
 
     public Plugin()
     {
@@ -125,6 +120,7 @@ public sealed class Plugin : IDalamudPlugin
         if (!trackingActive) return;
 
 #if DEBUG
+        //For debug, monitor Echo chat so I can type messages without sending to others
         if ((configuration.trackedChannels.IndexOf(chatMessage.LogKind) == -1) && (chatMessage.LogKind != XivChatType.Echo)) return;
 #else
         if (configuration.trackedChannels.IndexOf(chatMessage.LogKind) == -1) return;
@@ -198,27 +194,23 @@ public sealed class Plugin : IDalamudPlugin
                     }
                 }
             }
-            else if (configuration.showInstanceChange && payload.Type == PayloadType.RawText)
+            else if (configuration.showInstanceChange && (payload.Type == PayloadType.RawText))
             {
+                //Check for instance message. Remove capitalization and spaces
                 string text = ((TextPayload)payload).Text ?? "";
                 text = text.ToLower();
                 text = text.Replace(" ", string.Empty);
 
-                if (PossibleInstance1.Any(text.Contains))
+                //Up to 6 possible instances
+                for(uint instance = 1; instance < 6; ++instance)
                 {
-                    targetInstance = 1;
-                }
-                else if (PossibleInstance2.Any(text.Contains))
-                {
-                    targetInstance = 2;
-                }
-                else if (PossibleInstance3.Any(text.Contains))
-                {
-                    targetInstance = 3;
-                }
-                else if (PossibleInstance4.Any(text.Contains))
-                {
-                    targetInstance = 4;
+                    if( text.Contains("i" + instance) || 
+                        text.Contains("instance" + instance) ||
+                        text.Contains("instance" + (char)(0xE0B0 + instance)) || //Normal instance character
+                        text.Contains("instance" + (char)(0xE08F + instance)))  //Square number character
+                    {
+                        targetInstance = instance;
+                    }
                 }
             }
         }
@@ -301,6 +293,7 @@ public sealed class Plugin : IDalamudPlugin
     public void ToggleConfigUi() => configWindow.Toggle();
     public void ToggleMainUi() => mainWindow.Toggle();
 
+    //Check tracking mode. Config changed or window opened/closed
     public void CheckMode()
     {
         //Log.Information("CheckMode- trackingActive: " + trackingActive.ToString() + ", isTracking: " + configuration.isTracking.ToString() + ", windowOpen: " + mainWindow.IsOpen + ", whileClosed: " + configuration.isTrackingWithWindowClosed);
@@ -314,7 +307,7 @@ public sealed class Plugin : IDalamudPlugin
                 ChatGui.ChatMessage += Chat_OnChatMessage;
                 ClientState.MapIdChanged += MapIdChanged;
                 ClientState.InstanceChanged += InstanceChanged;
-                ChatGui.Print("[Train Tracker] Tracking is now active.");
+                //ChatGui.Print("[Train Tracker] Tracking is now active.");
                 //Log.Information("Tracking is now active");
             }
         }else if (trackingActive)
@@ -323,7 +316,7 @@ public sealed class Plugin : IDalamudPlugin
             ChatGui.ChatMessage -= Chat_OnChatMessage;
             ClientState.MapIdChanged -= MapIdChanged;
             ClientState.InstanceChanged -= InstanceChanged;
-            ChatGui.Print("[Train Tracker] Tracking is now disabled.");
+            //ChatGui.Print("[Train Tracker] Tracking is now disabled.");
             //Log.Information("Tracking is now disabled");
         }
     }

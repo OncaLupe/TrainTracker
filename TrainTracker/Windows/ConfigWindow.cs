@@ -1,5 +1,6 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.Text;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
@@ -62,16 +63,21 @@ public class ConfigWindow : Window, IDisposable
 
 
         ImGui.SameLine(ImGui.GetColumnWidth() - 100);
-        ImGui.PushStyleColor(ImGuiCol.Button, 0xFF5A66FF);
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0xFD4A39FF);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0xFF0000FF);
-        if (ImGui.Button("Support on Ko-Fi"))
+        using (var colorButton = ImRaii.PushColor(ImGuiCol.Button, 0xFF5A66FF))
         {
-            Process.Start(new ProcessStartInfo { FileName = "https://ko-fi.com/oncalupe", UseShellExecute = true });
+            using (var colorHovered = ImRaii.PushColor(ImGuiCol.ButtonHovered, 0xFD4A39FF))
+            {
+                using (var colorActive = ImRaii.PushColor(ImGuiCol.ButtonActive, 0xFF0000FF))
+                {
+                    if (ImGui.Button("Support on Ko-Fi"))
+                    {
+                        Process.Start(new ProcessStartInfo { FileName = "https://ko-fi.com/oncalupe", UseShellExecute = true });
+                    }
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Show your support and make me feel warm and fuzzy, and maybe yourself as well");
+                }
+            }
         }
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip("Show your support and make me feel warm and fuzzy, and maybe yourself as well");
-        ImGui.PopStyleColor(3);
 
 
         bool trackWithWindowClosed = configuration.isTrackingWithWindowClosed;
